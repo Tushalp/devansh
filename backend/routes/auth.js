@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, confirm_password } = req.body;
+    console.log(req.body);
 
  
     if (!name || !email || !password || !confirm_password) {
@@ -65,35 +66,61 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const  { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-          return res.status(400).json({
-         message: "User not found",
+      const { email, password } = req.body;
+  
+
+      if (!email || !password) {
+        return res.status(400).json({
+          message: "Email and password are required",
           success: false
-            });
-        }
-           const isValidPassword = await bcrypt.compare(password, user.password);
-          if (!isValidPassword) {
-           return res.status(400).json({
-           message: "Invalid password",
-           success: false
-            });
-                      }
-          const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY,{expiresIn: '1h' } );
-              res.json({ message: "User logged in successfully",
-                          success: true,
-                          token
-                        });
-       }catch(error){
-          console.log(error)
-          return res.status(500).json({
-              message: "Error in login",
-              success: false
-              });
-              
-       }
-
-});
-
+        });
+      }
+  
+    
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({
+          message: "User not found",
+          success: false
+        });
+      }
+  
+      
+      if (!user.password) {
+        return res.status(500).json({
+          message: "User has no password stored",
+          success: false
+        });
+      }
+  
+   
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({
+          message: "Invalid password",
+          success: false
+        });
+      }
+      
+      const token = jwt.sign(
+        { userId: user._id },
+        process.env.SECRET_KEY, 
+        { expiresIn: '1h' }
+      );
+  
+      
+      res.json({
+        message: "User logged in successfully",
+        success: true,
+        token
+      });
+  
+    } catch (error) {
+      console.error("Login Error: ", error);
+      return res.status(500).json({
+        message: "Error in login",
+        success: false
+      });
+    }
+  });
 module.exports = router;
