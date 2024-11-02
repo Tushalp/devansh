@@ -27,67 +27,28 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-
-const rooms = {}; 
-
+// Handle socket connections
 io.on('connection', (socket) => {
-  console.log('New client connected', socket.id);
+  console.log('New client connected:', socket.id);
 
-
+  // Handle user joining a room
   socket.on('joinRoom', ({ roomId, username }) => {
-    if (!rooms[roomId]) {
-      rooms[roomId] = [];
-    }
-
-    rooms[roomId].push({ socketId: socket.id, username });
-    socket.join(roomId);
-    console.log(`${username} (${socket.id}) joined room: ${roomId}`);
-
-   
-    io.to(roomId).emit('message', `${username} joined the room`);
+    socket.join(roomId); // Join the specified room
+    console.log(`${username} joined room: ${roomId}`);
   });
 
-  
+  // Handle incoming chat messages
   socket.on('chatMessage', ({ roomId, username, text }) => {
-    if (text && roomId && username) {
-      const message = { username, text, time: new Date().toISOString() };
-      io.to(roomId).emit('message', message);
-    } else {
-      console.error('Invalid message format', { roomId, username, text });
-    }
+    console.log('Received message:', { roomId, username, text });
+    const message = { username, text, time: new Date().toISOString() };
+    io.to(roomId).emit('message', message); // Emit to the specific room
   });
 
-  
-
- 
+  // Handle disconnection
   socket.on('disconnect', () => {
-    let disconnectedUser = null;
-    let roomIdOfDisconnectedUser = null;
-
-  
-    for (const roomId in rooms) {
-      rooms[roomId] = rooms[roomId].filter(user => {
-        if (user.socketId === socket.id) {
-          disconnectedUser = user.username;
-          roomIdOfDisconnectedUser = roomId;
-          return false;
-        }
-        return true;
-      });
-
-    
-      if (rooms[roomId].length === 0) {
-        delete rooms[roomId];
-      }
-    }
-
-    if (disconnectedUser && roomIdOfDisconnectedUser) {
-      console.log(`Client disconnected: ${disconnectedUser} from room ${roomIdOfDisconnectedUser}`);
-      io.to(roomIdOfDisconnectedUser).emit('message', `${disconnectedUser} has left the room`);
-    }
+    console.log('Client disconnected:', socket.id);
   });
 });
 
 const PORT = process.env.PORT || 5000;
-
 server.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));

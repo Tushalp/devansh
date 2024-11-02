@@ -1,69 +1,58 @@
-import React, { useState } from 'react'
-// import { useToast } from '@chakra-ui/react'
+// Join.js
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
-
 export const Join = () => {
- 
-    const [fomedate, setfomedate] = useState( {roomId:''});
-    const [error, setError] = useState(""); 
+    const [formData, setFormData] = useState({ roomId: '', username: '' });
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
-    const navigate=useNavigate()
     function changeHandler(event) {
       const { name, value } = event.target;
-      setfomedate(prevFormData => ({
-        ...prevFormData,
-        [name]: value
-      }));
+      setFormData(prevData => ({ ...prevData, [name]: value }));
     }
-        async function submitHandler(event) {
-          event.preventDefault();
-          setError("");
-        try {
-          console.log("Submitting data:", fomedate);
-          const token = localStorage.getItem('token');
-          const response = await axios.post("http://localhost:8080/room/join", fomedate,
-            {
-              headers: {
-                Authorization: `Bearer ${token}` 
-              }
-            }
-          );
-          console.log("Id creater successful:", response.data);
 
-       
-          setfomedate({roomId:'' });
-          navigate('/chats')
-        } catch (error) {
-          console.error("Error during create id:", error);
-          // if (error.response && error.response.data) {
-          //   setError(error.response.data.message); 
-          // } else {
-          //   setError("An error occurred. Please try again.");
-          // }
-        }
+    async function submitHandler(event) {
+      event.preventDefault();
+      setError("");
+      try {
+        const token = localStorage.getItem('token');
+         await axios.post("http://localhost:4000/room/join", formData, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setFormData({ roomId: '', username: '' });
+        navigate('/chats', { state: { roomId: formData.roomId, username: formData.username } });
+      } catch (error) {
+        console.error("Error during join:", error);
+        setError("Failed to join room. Please try again.");
       }
+    }
 
-
-
-  return (
-    <div>
-        <form onSubmit={submitHandler}>
-        <label className='signlable'>Enter room id</label>
-            <div>
-                <input className='signinput'
-                 type='Password'
-                 placeholder='Enter Your id'
-                 name='roomId'
-                 value={fomedate.roomId}
-                 onChange={changeHandler}
-                ></input>
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>} 
-        <button className='signbtn' type='submit'>Join room</button>
-        </form>
-    </div>
-  )
-}
+    return (
+      <div>
+          <form onSubmit={submitHandler}>
+              <label>Enter Room ID</label>
+              <input
+                  type="text"
+                  placeholder="Room ID"
+                  name="roomId"
+                  value={formData.roomId}
+                  onChange={changeHandler}
+              />
+              <label>Enter Username</label>
+              <input
+                  type="text"
+                  placeholder="Username"
+                  name="username"
+                  value={formData.username}
+                  onChange={changeHandler}
+              />
+              {error && <p style={{ color: 'red' }}>{error}</p>}
+              <button type="submit">Join Room</button>
+          </form>
+      </div>
+    );
+};

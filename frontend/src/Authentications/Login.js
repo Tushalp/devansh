@@ -20,12 +20,12 @@ const navigate=useNavigate()
 
     try {
       console.log("Submitting data:", formData);
-      const response = await axios.post("http://192.168.29.20:8080/auth/login", formData);
+      const response = await axios.post("http://localhost:4000/auth/login", formData);
       console.log("Login successful:", response.data);
       localStorage.setItem("token", response.data.token);
    
       setFormData({ email: "", password: '' });
-      navigate('/chats')
+      navigate('/Addmember')
     } catch (error) {
       console.error("Error during login:", error);
       if (error.response && error.response.data) {

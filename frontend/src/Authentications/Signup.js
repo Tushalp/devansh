@@ -29,7 +29,7 @@ export const Signup = () => {
         setError("");
         setSuccess("");
 
-        axios.post('http://192.168.29.20:8080/auth/signup', formData)
+        axios.post('http://localhost:4000/auth/signup', formData)
             .then((response) => {
                 console.log('Response from server:', response.data);
                 setSuccess("Signup successful!"); 
@@ -40,7 +40,7 @@ export const Signup = () => {
                     password: '',
                     confirm_password: ''
                 });
-                navigate('/login')
+                navigate('/login');
             })
             .catch((error) => {
                 // if (error.response) {
