@@ -21,30 +21,35 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 app.use('/auth', authRoutes);
-app.use('/room', roomRoutes(io));
+app.use('/room', roomRoutes(io)); 
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-// Handle socket connections
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
-  // Handle user joining a room
+  // socket.on('chatMessage', ({ roomId, username, text }) => {
+  //   console.log(`${username} sent message: ${text} in room: ${roomId}`);
+  //   const message = { username, text, time: new Date().toISOString() };
+  //   io.to(roomId).emit('message', message); // Emit to the room only
+  // });
+  
+
   socket.on('joinRoom', ({ roomId, username }) => {
-    socket.join(roomId); // Join the specified room
+    socket.join(roomId); 
     console.log(`${username} joined room: ${roomId}`);
+    
+    // io.to(roomId).emit('message', { username: 'Admin', text: `${username} has joined the room` });
   });
 
-  // Handle incoming chat messages
   socket.on('chatMessage', ({ roomId, username, text }) => {
-    console.log('Received message:', { roomId, username, text });
+    console.log(`${username} sent message: ${text} in room: ${roomId}`);
     const message = { username, text, time: new Date().toISOString() };
-    io.to(roomId).emit('message', message); // Emit to the specific room
+    io.to(roomId).emit('message', message);
   });
 
-  // Handle disconnection
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
@@ -52,3 +57,6 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+
+
+

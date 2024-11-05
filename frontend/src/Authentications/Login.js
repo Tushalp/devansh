@@ -42,7 +42,7 @@ const navigate=useNavigate()
         <label className='signLabel'>Email</label>
         <div>
           <input
-            className='signInput'
+            className='signinput'
             type='email'
             placeholder='Enter Your Email'
             value={formData.email}
@@ -54,7 +54,7 @@ const navigate=useNavigate()
         <label className='signLabel'>Password</label>
         <div>
           <input
-            className='signInput'
+            className='signinput'
             type='password'
             placeholder='Enter Your Password'
             value={formData.password}
@@ -65,7 +65,7 @@ const navigate=useNavigate()
 
         {error && <p style={{ color: 'red' }}>{error}</p>} 
 
-        <button className='signBtn' type='submit'>Login</button>
+        <button className='signbtn' type='submit'>Login</button>
       </form>
     </div>
   );

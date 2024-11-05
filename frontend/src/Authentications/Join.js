@@ -1,7 +1,10 @@
-// Join.js
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:4000');
 
 export const Join = () => {
     const [formData, setFormData] = useState({ roomId: '', username: '' });
@@ -18,11 +21,12 @@ export const Join = () => {
       setError("");
       try {
         const token = localStorage.getItem('token');
-         await axios.post("http://localhost:4000/room/join", formData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        await axios.post("http://localhost:4000/room/join", formData, {
+          headers: { Authorization: `Bearer ${token}` }
         });
+
+        socket.emit('joinRoom', { roomId: formData.roomId, username: formData.username });
+        
         setFormData({ roomId: '', username: '' });
         navigate('/chats', { state: { roomId: formData.roomId, username: formData.username } });
       } catch (error) {
@@ -56,3 +60,6 @@ export const Join = () => {
       </div>
     );
 };
+
+
+

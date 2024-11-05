@@ -19,14 +19,14 @@ export const Chatapage = () => {
       console.log('Received message:', msg);
       setChat((prevChat) => [...prevChat, msg]); 
     });
-
+    
     return () => {
       socket.off('message'); 
     };
   }, [roomId, username]);
 
   const sendMessage = () => {
-    if (message && roomId) { 
+    if (message && roomId ) { 
       const msgData = { roomId, username, text: message, time: new Date().toISOString() };
       socket.emit('chatMessage', msgData); 
       setMessage(''); 
@@ -57,3 +57,5 @@ export const Chatapage = () => {
     </div>
   );
 };
+
+

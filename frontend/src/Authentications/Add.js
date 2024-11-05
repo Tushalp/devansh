@@ -3,10 +3,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:4000'); // Adjust if your server has a different IP
+const socket = io('http://localhost:4000'); 
 
 export const Add = () => {
-  const [fomedate, setfomedate] = useState({ roomId: '' });
+  const [fomedate, setfomedate] = useState({ roomId: '',username:'' });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ export const Add = () => {
       console.log("Submitting data:", fomedate);
       const token = localStorage.getItem('token');
       
-      // Create the room
+ 
       const response = await axios.post("http://localhost:4000/room/create", fomedate, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -34,12 +34,12 @@ export const Add = () => {
 
       console.log("Room created successfully:", response.data);
       
-      // Emit join event after successful creation
-      socket.emit('joinRoom', { roomId: fomedate.roomId, username: "YourUsername" });
 
-      // Clear the form and navigate to chat
-      setfomedate({ roomId: '' });
-      navigate('/chats');
+      socket.emit('joinRoom', { roomId: fomedate.roomId, username: fomedate.username });
+
+    
+      setfomedate({ roomId: '', username:''});
+      navigate('/chats', { state: { roomId: fomedate.roomId, username: fomedate.username } });
       
     } catch (error) {
       console.error("Error during room creation:", error);
@@ -58,16 +58,30 @@ export const Add = () => {
         <div>
           <input
             className="signinput"
-            type="password"
+            type="text"
             placeholder="Enter Room ID"
             name="roomId"
             value={fomedate.roomId}
             onChange={changeHandler}
           />
         </div>
+        <label>Enter Username</label>
+              <input
+                  type="text"
+                  placeholder="Username"
+                  name="username"
+                  value={fomedate.username}
+                  onChange={changeHandler}
+              />
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button className="signbtn" type="submit">Create and Join Room</button>
       </form>
     </div>
   );
 };
+
+
+
+
+
+
